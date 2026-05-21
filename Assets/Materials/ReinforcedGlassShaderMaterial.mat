@@ -25,17 +25,26 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _CellDepth: 0.35
+    - _CellDepthRadius: 0.1
+    - _CellEdgeSoftness: 0.05
     - _FresnelIntensity: 0.6
     - _FresnelPower: 2.5
+    - _GlowFalloff: 6
+    - _GlowIntensity: 5
+    - _GlowWidth: 0.21
     - _HexLineWidth: 0.03
-    - _HexScale: 15
-    - _PulseFrequency: 2
-    - _PulseSpeed: 4
+    - _HexScale: 8
+    - _PulseFrequency: 8
+    - _PulseSharpness: 16
+    - _PulseSpeed: 20
     - _PulseWidth: 0.12
     m_Colors:
-    - _FresnelColor: {r: 0, g: 0.5, b: 1, a: 1}
+    - _CellColor: {r: 0, g: 0, b: 0, a: 0}
+    - _FresnelColor: {r: 1, g: 0, b: 0.047945976, a: 1}
     - _GlassColor: {r: 0.049999982, g: 0.19999996, b: 0.34999996, a: 0.25}
-    - _PulseColor: {r: 0, g: 0.8, b: 1, a: 1}
+    - _GlowColor: {r: 1, g: 0, b: 0.354424, a: 1}
+    - _PulseColor: {r: 0.104001164, g: 1, b: 0, a: 1}
     - _PulseDirection: {r: 1, g: 0.4, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
