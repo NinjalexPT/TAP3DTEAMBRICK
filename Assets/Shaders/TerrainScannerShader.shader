@@ -1,61 +1,52 @@
-Shader "TerrainScannerShader"
+Shader "TAP/TerrainScannerShader"
 {
-    // ═══════════════════════════════════════════════════════════════
-    //  TerrainScannerShader — Versão Completa
-    //  Inclui: Triplanar Grid · Contour Lines · Vertex Displacement
-    //          Depth Texture (soft edges) · Opacity Masking (Reveal)
-    // ═══════════════════════════════════════════════════════════════
+    // Aplica este shader aos materiais dos objetos do cenário.
+    // O TerrainScannerController.cs actualiza os globais em runtime.
     Properties
     {
         [Header(Base Surface)]
-        _MainTex          ("Base Texture",          2D)               = "white" {}
-        _BaseColor        ("Base Color",            Color)            = (0.15, 0.16, 0.22, 1.0)
-        _Smoothness       ("Smoothness",            Range(0,1))       = 0.4
+        _MainTex           ("Base Texture",           2D)              = "white" {}
+        _BaseColor         ("Base Color",             Color)           = (0.15, 0.16, 0.22, 1.0)
+
+        [Header(Grid Texture Triplanar)]
+        _GridTex           ("Grid Texture (Sci-Fi)",  2D)              = "white" {}
+        _GridScale         ("Grid Scale",             Range(0.05, 5.0)) = 0.5
+        [HDR]
+        _GridColor         ("Grid Color",             Color)           = (0.0, 0.6, 1.0, 1.0)
+        _GridIntensity     ("Grid Intensity",         Range(0.0, 4.0)) = 2.0
 
         [Header(Scanner Wave)]
         [HDR]
-        _WaveColor        ("Wave Front Color",      Color)            = (0.0, 1.0, 0.75, 1.0)
-        _WaveWidth        ("Wave Front Width",      Range(0.05, 8.0)) = 1.2
-        _WaveGlowRange    ("Wave Trail Range",      Range(0.5, 40.0)) = 12.0
-        _WaveIntensity    ("Wave Intensity",        Range(0.5, 10.0)) = 4.0
+        _ScanColor         ("Scan Color (HDR)",       Color)           = (0.0, 1.0, 0.75, 1.0)
+        _ScanWidth         ("Scan Ring Width",        Range(0.05, 8.0)) = 1.5
+        _ScanGlowRange     ("Trail Glow Range",       Range(0.5, 40.0)) = 15.0
+        _ScanIntensity     ("Scan Intensity",         Range(0.5, 10.0)) = 4.0
 
-        [Header(Triplanar Grid)]
-        [HDR]
-        _GridColor        ("Grid Color",            Color)            = (0.0, 0.6, 1.0, 1.0)
-        _GridScale        ("Grid Scale",            Range(0.05, 4.0)) = 0.4
-        _GridLineWidth    ("Grid Line Width",       Range(0.005,0.15))= 0.03
-        _GridIntensity    ("Grid Intensity",        Range(0.0, 4.0))  = 1.8
+        [Header(Vertex Displacement)]
+        _DisplaceAmount    ("Displace Amount",        Range(0.0, 0.5)) = 0.08
+        _DisplaceSpeed     ("Displace Speed",         Range(1.0, 20.0)) = 8.0
 
-        [Header(Contour Lines)]
+        [Header(Intersection Glow)]
         [HDR]
-        _ContourColor     ("Contour Color",         Color)            = (0.2, 0.9, 1.0, 1.0)
-        _ContourSpacing   ("Contour Spacing (m)",   Range(0.1, 10.0)) = 1.5
-        _ContourWidth     ("Contour Width",         Range(0.005,0.1)) = 0.02
-        _ContourIntensity ("Contour Intensity",     Range(0.0, 4.0))  = 1.2
+        _IntersectColor    ("Intersect Color",        Color)           = (0.0, 0.85, 1.0, 1.0)
+        _IntersectWidth    ("Intersect Width",        Range(0.01, 1.0)) = 0.15
+        _IntersectIntensity("Intersect Intensity",   Range(0.0, 5.0)) = 2.5
 
         [Header(Item Reveal)]
         [HDR]
-        _RevealColor      ("Reveal Color",          Color)            = (1.0, 0.55, 0.0, 1.0)
-        _RevealIntensity  ("Reveal Intensity",      Range(0.0, 8.0))  = 3.5
-        _IsRevealable     ("Is Revealable",         Range(0,1))       = 0.0
-
-        [Header(Vertex Displacement)]
-        _DisplaceStrength ("Displace Strength",     Range(0.0, 0.5))  = 0.08
-        _DisplaceWidth    ("Displace Width",        Range(0.1, 5.0))  = 2.0
-
-        [Header(Rendering)]
-        [Toggle] _ZWrite  ("Z Write (Off para Reveal)", Float)        = 1
+        _RevealColor       ("Reveal Color",           Color)           = (1.0, 0.55, 0.0, 1.0)
+        _RevealIntensity   ("Reveal Intensity",       Range(0.0, 8.0)) = 3.5
+        _IsRevealable      ("Is Revealable",          Range(0, 1))     = 0.0
     }
 
     SubShader
     {
-        // Transparent para suportar o Opacity Masking dos itens revelavel.
-        // Terreno usa _ZWrite=1 e finalAlpha=1, comporta-se como opaco.
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         LOD 300
-        Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite [_ZWrite]
 
+        // ══════════════════════════════════════════════════════════
+        // PASS PRINCIPAL
+        // ══════════════════════════════════════════════════════════
         Pass
         {
             Tags { "LightMode"="ForwardBase" }
@@ -67,50 +58,48 @@ Shader "TerrainScannerShader"
             #include "Lighting.cginc"
             #include "AutoLight.cginc"
 
-            // ── Depth Texture (activada via script na camara) ─────────
-            sampler2D _CameraDepthTexture;
+            // ── Globais (set via Shader.SetGlobal* no controller) ──
+            float4 _ScanCenter;       // world-space XYZ da origem
+            float  _ScanRadius;       // raio actual da onda
+            float  _ScanMaxRadius;    // raio máximo (controla fade)
+            float  _ScanActive;       // 0 = off | 1 = on
+            float  _ScanRevealItems;  // 0 = não revela | 1 = revela
 
-            // ── Globais do scanner (TerrainScannerController.cs) ──────
-            float4 _ScannerOrigin;      // world-space XYZ origem da onda
-            float  _ScannerRadius;      // raio atual em expansao
-            float  _ScannerMaxRadius;   // raio maximo (controla fade)
-            float  _ScannerActive;      // 0 = inativo | 1 = ativo
-            float  _ScannerRevealItems; // 0 = nao revela | 1 = revela
-
-            // ── Material props ────────────────────────────────────────
+            // ── Material props ─────────────────────────────────────
             sampler2D _MainTex;
             float4    _MainTex_ST;
             float4    _BaseColor;
-            float     _Smoothness;
 
-            float4 _WaveColor;
-            float  _WaveWidth;
-            float  _WaveGlowRange;
-            float  _WaveIntensity;
+            sampler2D _GridTex;
+            float     _GridScale;
+            float4    _GridColor;
+            float     _GridIntensity;
 
-            float4 _GridColor;
-            float  _GridScale;
-            float  _GridLineWidth;
-            float  _GridIntensity;
+            float4 _ScanColor;
+            float  _ScanWidth;
+            float  _ScanGlowRange;
+            float  _ScanIntensity;
 
-            float4 _ContourColor;
-            float  _ContourSpacing;
-            float  _ContourWidth;
-            float  _ContourIntensity;
+            float  _DisplaceAmount;
+            float  _DisplaceSpeed;
+
+            float4 _IntersectColor;
+            float  _IntersectWidth;
+            float  _IntersectIntensity;
 
             float4 _RevealColor;
             float  _RevealIntensity;
             float  _IsRevealable;
 
-            float _DisplaceStrength;
-            float _DisplaceWidth;
+            // Depth texture (câmara precisa de depth mode)
+            sampler2D_float _CameraDepthTexture;
 
-            // ─────────────────────────────────────────────────────────
+            // ── Structs ────────────────────────────────────────────
             struct appdata
             {
-                float4 vertex : POSITION;
-                float3 normal : NORMAL;
-                float2 uv     : TEXCOORD0;
+                float4 vertex  : POSITION;
+                float3 normal  : NORMAL;
+                float2 uv      : TEXCOORD0;
             };
 
             struct v2f
@@ -119,164 +108,132 @@ Shader "TerrainScannerShader"
                 float2 uv        : TEXCOORD0;
                 float3 worldPos  : TEXCOORD1;
                 float3 worldNorm : TEXCOORD2;
-                float4 screenPos : TEXCOORD3;   // para depth texture
-                SHADOW_COORDS(4)
+                float4 screenPos : TEXCOORD3;
+                float  eyeDepth  : TEXCOORD4;
+                SHADOW_COORDS(5)
             };
 
-            // ─────────────────────────────────────────────────────────
-            // Helpers de grid / contorno
-            // ─────────────────────────────────────────────────────────
-
-            float GridLine(float v, float lw)
+            // ── Triplanar: amostra _GridTex nos 3 eixos ────────────
+            float4 TriplanarTex(sampler2D tex,
+                                float3 worldPos,
+                                float3 worldNorm,
+                                float  scale)
             {
-                float f = frac(v - 0.5) - 0.5;
-                return 1.0 - smoothstep(0.0, lw, abs(f));
-            }
-
-            float TriplanarGrid(float3 wpos, float3 wnorm, float scale, float lw)
-            {
-                float3 blend = abs(wnorm);
+                // Pesos baseados na normal — blending suave
+                float3 blend = abs(worldNorm);
                 blend = pow(blend, 6.0);
                 blend /= (blend.x + blend.y + blend.z + 1e-4);
 
-                float gx = max(GridLine(wpos.y * scale, lw), GridLine(wpos.z * scale, lw));
-                float gy = max(GridLine(wpos.x * scale, lw), GridLine(wpos.z * scale, lw));
-                float gz = max(GridLine(wpos.x * scale, lw), GridLine(wpos.y * scale, lw));
+                // Passo 3 do documento: amostragem nos 3 planos
+                float4 cx = tex2D(tex, worldPos.yz * scale); // plano YZ (lado)
+                float4 cy = tex2D(tex, worldPos.xz * scale); // plano XZ (cima)
+                float4 cz = tex2D(tex, worldPos.xy * scale); // plano XY (frente)
 
-                return saturate(gx * blend.x + gy * blend.y + gz * blend.z);
+                return cx * blend.x + cy * blend.y + cz * blend.z;
             }
 
-            float ContourLine(float worldY, float spacing, float lw)
-            {
-                return GridLine(worldY / spacing, lw);
-            }
-
-            // ─────────────────────────────────────────────────────────
+            // ── VERTEX SHADER ──────────────────────────────────────
+            // Passo 2 do documento: deslocamento físico dos vértices
             v2f vert(appdata v)
             {
-                // ── Vertex Displacement ───────────────────────────────
-                // 1. Calcular posicao world ANTES do deslocamento
-                float3 worldPos0  = mul(unity_ObjectToWorld, v.vertex).xyz;
-                float3 worldNorm0 = UnityObjectToWorldNormal(v.normal);
+                // 1. Posição e normal no espaço do mundo
+                float3 worldPos  = mul(unity_ObjectToWorld, v.vertex).xyz;
+                float3 worldNorm = UnityObjectToWorldNormal(v.normal);
 
-                // 2. Distancia da wave front a este vertice
-                float  dist0       = length(worldPos0 - _ScannerOrigin.xyz);
-                float  waveDist    = abs(dist0 - _ScannerRadius);
+                // 2. Distância do vértice ao centro do scan
+                float dist = length(worldPos - _ScanCenter.xyz);
 
-                // 3. Mascara de pico: maximo na frente da onda
-                float  dispMask    = smoothstep(_DisplaceWidth, 0.0, waveDist);
-                dispMask          *= _ScannerActive;
+                // 3. Máscara de impacto: pico quando dist ≈ _ScanRadius
+                float distToWave = abs(dist - _ScanRadius);
+                float waveMask   = smoothstep(_ScanWidth, 0.0, distToWave)
+                                 * _ScanActive;
 
-                // 4. Deslocar ao longo da normal world-space
-                float3 displaceWS  = worldNorm0 * dispMask * _DisplaceStrength;
+                // 4. Vertex displacement: "pulso" físico ao longo da normal
+                float displaceWave = sin(_Time.y * _DisplaceSpeed) * waveMask;
+                v.vertex.xyz += v.normal * displaceWave * _DisplaceAmount;
 
-                // 5. Converter deslocamento world->object para aplicar ao vertex
-                float3 displaceOS  = mul((float3x3)unity_WorldToObject, displaceWS);
-                v.vertex.xyz      += displaceOS;
-
-                // ── Output ────────────────────────────────────────────
+                // 5. Output para o fragment shader
                 v2f o;
-                o.pos       = UnityObjectToClipPos(v.vertex);
-                o.uv        = TRANSFORM_TEX(v.uv, _MainTex);
-                o.worldPos  = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.worldNorm = worldNorm0;
+                o.pos      = UnityObjectToClipPos(v.vertex);
+                o.uv       = TRANSFORM_TEX(v.uv, _MainTex);
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.worldNorm = worldNorm;
                 o.screenPos = ComputeScreenPos(o.pos);
+                // Eye-space depth para o intersection glow
+                o.eyeDepth  = -mul(UNITY_MATRIX_MV, v.vertex).z;
                 TRANSFER_SHADOW(o);
                 return o;
             }
 
-            // ─────────────────────────────────────────────────────────
+            // ── FRAGMENT SHADER ────────────────────────────────────
             fixed4 frag(v2f i) : SV_Target
             {
                 float3 N = normalize(i.worldNorm);
 
-                // ── 1. Base lighting (Lambert + sombras) ───────────────
+                // ─ 1. Base surface com lighting Lambert simples ──────
                 float4 baseTex = tex2D(_MainTex, i.uv);
                 float3 baseCol = baseTex.rgb * _BaseColor.rgb;
                 float  NdotL   = saturate(dot(N, _WorldSpaceLightPos0.xyz));
                 float  shadow  = SHADOW_ATTENUATION(i);
                 float3 lit     = baseCol * (NdotL * shadow * 0.8 + 0.35);
 
-                // ── 2. Depth Texture — Soft Intersection ───────────────
-                // Le a profundidade da cena para suavizar onde a onda
-                // intersecta outras superficies (efeito soft-particle).
-                // Requer camera.depthTextureMode = DepthTextureMode.Depth
-                float2 screenUV   = i.screenPos.xy / i.screenPos.w;
-                float  sceneDepth = LinearEyeDepth(
-                    SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenUV)
-                );
-                float  fragDepth  = i.screenPos.w;
-                // Fade suave onde a onda corta outras superficies
-                float  softEdge   = saturate((sceneDepth - fragDepth) / 0.5);
-
-                // ── 3. Distancia ao scanner ────────────────────────────
-                float3 delta      = i.worldPos - _ScannerOrigin.xyz;
-                float  dist       = length(delta);
-                float  maxR       = max(_ScannerMaxRadius, 0.001);
-                float  normDist   = dist / maxR;
-                float  inside     = step(dist, _ScannerRadius);
+                // ─ 2. Distância ao scanner (por pixel) ───────────────
+                float  dist      = length(i.worldPos - _ScanCenter.xyz);
+                float  maxR      = max(_ScanMaxRadius, 0.001);
+                float  normDist  = dist / maxR;
+                float  inside    = step(dist, _ScanRadius);
                 float  radiusFade = saturate((1.0 - normDist) * 3.0);
 
-                // ── 4. Frente da onda (anel brilhante) ─────────────────
-                float  distToFront = abs(dist - _ScannerRadius);
-                float  waveMask    = smoothstep(_WaveWidth, 0.0, distToFront)
-                                   * radiusFade
-                                   * softEdge;   // suaviza nas intersecoes
-                float3 waveGlow    = _WaveColor.rgb * waveMask * _WaveIntensity;
+                // Trail que fica atrás da onda
+                float  trailDist = _ScanRadius - dist;
+                float  trailFade = pow(saturate(trailDist / _ScanGlowRange), 1.8)
+                                 * inside * radiusFade;
 
-                // ── 5. Trail atras da onda ─────────────────────────────
-                float  trailDist = _ScannerRadius - dist;
-                float  trailFade = saturate(trailDist / _WaveGlowRange);
-                trailFade = pow(trailFade, 1.8) * inside * radiusFade;
+                // ─ 3. Anel da onda (Passo 5 do documento) ────────────
+                // smoothstep duplo cria um anel centrado em _ScanRadius
+                float wave = smoothstep(_ScanRadius - _ScanWidth, _ScanRadius, dist)
+                           * smoothstep(_ScanRadius + _ScanWidth, _ScanRadius, dist);
+                float3 waveCol = _ScanColor.rgb * wave * _ScanIntensity * radiusFade;
 
-                // ── 6. Grid triplanar (dentro da area varrida) ─────────
-                float  grid    = TriplanarGrid(i.worldPos, N, _GridScale, _GridLineWidth);
-                float3 gridCol = _GridColor.rgb * grid * _GridIntensity * trailFade;
+                // ─ 4. Triplanar grid (Passo 3 do documento) ──────────
+                float4 gridSample = TriplanarTex(_GridTex, i.worldPos, N, _GridScale);
+                float3 gridCol    = gridSample.rgb * _GridColor.rgb
+                                  * _GridIntensity * trailFade;
 
-                // ── 7. Linhas de contorno por altitude ─────────────────
-                float  contour    = ContourLine(i.worldPos.y, _ContourSpacing, _ContourWidth);
-                float3 contourCol = _ContourColor.rgb * contour * _ContourIntensity * trailFade;
+                // ─ 5. Intersection glow (Passo 4 do documento) ───────
+                // Lê a depth texture para encontrar onde os objetos se tocam
+                float sceneDepth    = LinearEyeDepth(
+                                        SAMPLE_DEPTH_TEXTURE_PROJ(
+                                            _CameraDepthTexture,
+                                            UNITY_PROJ_COORD(i.screenPos)));
+                float depthDiff     = abs(sceneDepth - i.eyeDepth);
+                float intersectMask = smoothstep(_IntersectWidth, 0.0, depthDiff)
+                                    * trailFade;
+                float3 intersectCol = _IntersectColor.rgb
+                                    * intersectMask * _IntersectIntensity;
 
-                // ── 8. Reveal de itens ─────────────────────────────────
+                // ─ 6. Item reveal ─────────────────────────────────────
                 float  revealPulse = 0.5 + 0.5 * sin(_Time.y * 5.0 + dist * 0.5);
-                float3 revealCol   = _RevealColor.rgb * _RevealIntensity
-                                   * _IsRevealable * trailFade
-                                   * _ScannerRevealItems * revealPulse;
+                float3 viewDir     = normalize(_WorldSpaceCameraPos - i.worldPos);
+                float  rim         = pow(1.0 - saturate(dot(N, viewDir)), 3.0);
+                float3 revealCol   = (_RevealColor.rgb * _RevealIntensity * revealPulse
+                                   +  _RevealColor.rgb * rim * 2.0)
+                                   * _IsRevealable * trailFade * _ScanRevealItems;
 
-                // Rim glow adicional no reveal
-                float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
-                float  rim     = pow(1.0 - saturate(dot(N, viewDir)), 3.0);
-                revealCol     += _RevealColor.rgb * rim * _IsRevealable
-                               * _ScannerRevealItems * trailFade * 2.0;
+                // ─ 7. Composição final (Passo 5 do documento) ─────────
+                // Dentro do trail: grelha + intersect | na frente: anel
+                // Fora do scan: apenas lit base
+                float3 scanEffect = waveCol + gridCol + intersectCol + revealCol;
+                float3 finalCol   = lit + scanEffect * _ScanActive;
 
-                // ── 9. Opacity Masking (Reveal) ────────────────────────
-                //
-                //   _IsRevealable = 0 (terreno):
-                //     → Alpha sempre 1 (opaco). Scanner so adiciona visuais.
-                //
-                //   _IsRevealable = 1 (item escondido):
-                //     → Scanner inativo:  Alpha = 0  (completamente invisivel)
-                //     → Onda passa:       Alpha sobe com trailFade
-                //     → _ScannerRevealItems = 0: permanece invisivel
-                //
-                float baseAlpha   = 1.0 - _IsRevealable;   // terreno=1, reveal=0
-                float revealAlpha = saturate(trailFade * 4.0) * _ScannerRevealItems;
-                float activeAlpha = lerp(1.0, revealAlpha, _IsRevealable);
-                float finalAlpha  = lerp(baseAlpha, activeAlpha, _ScannerActive);
-
-                // ── 10. Composicao final ────────────────────────────────
-                float3 finalCol = lit
-                                + (waveGlow + gridCol + contourCol + revealCol)
-                                * _ScannerActive;
-
-                return fixed4(finalCol, finalAlpha);
+                return fixed4(finalCol, 1.0);
             }
             ENDCG
         }
 
-        // ── Shadow Caster ─────────────────────────────────────────────
-        // ATENCAO: parametro DEVE chamar-se "v" e campos "vertex"/"normal"
-        // pois os macros Unity referenciam v.vertex e v.normal internamente.
+        // ══════════════════════════════════════════════════════════
+        // SHADOW CASTER — com vertex displacement para sombras exactas
+        // ══════════════════════════════════════════════════════════
         Pass
         {
             Tags { "LightMode"="ShadowCaster" }
@@ -285,6 +242,13 @@ Shader "TerrainScannerShader"
             #pragma fragment frag_shadow
             #pragma multi_compile_shadowcaster
             #include "UnityCG.cginc"
+
+            float4 _ScanCenter;
+            float  _ScanRadius;
+            float  _ScanActive;
+            float  _ScanWidth;
+            float  _DisplaceAmount;
+            float  _DisplaceSpeed;
 
             struct ShadowInput
             {
@@ -297,6 +261,13 @@ Shader "TerrainScannerShader"
 
             ShadowV2F vert_shadow(ShadowInput v)
             {
+                float3 worldPos  = mul(unity_ObjectToWorld, v.vertex).xyz;
+                float  dist      = length(worldPos - _ScanCenter.xyz);
+                float  distToWave = abs(dist - _ScanRadius);
+                float  waveMask   = smoothstep(_ScanWidth, 0.0, distToWave) * _ScanActive;
+                float  dsp        = sin(_Time.y * _DisplaceSpeed) * waveMask;
+                v.vertex.xyz     += v.normal * dsp * _DisplaceAmount;
+
                 ShadowV2F o;
                 TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
                 return o;
