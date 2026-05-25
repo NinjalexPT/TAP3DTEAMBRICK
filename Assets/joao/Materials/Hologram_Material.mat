@@ -34,8 +34,8 @@ Material:
     - _FadeSpeed: 3.76
     - _FlickerStrength: 0.548
     - _FresnelPower: 4
-    - _GlitchAmplitude: 0.053
-    - _GlitchFrequency: 23.8
+    - _GlitchAmplitude: 0.068
+    - _GlitchFrequency: 20.8
     - _ScanlineDensity: 200
     - _ScanlineSpeed: 16
     - _ScanlineStrength: 1.3
