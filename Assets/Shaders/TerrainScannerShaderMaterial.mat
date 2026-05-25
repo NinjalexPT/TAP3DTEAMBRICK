@@ -35,7 +35,7 @@ Material:
     m_Floats:
     - _DisplaceAmount: 0.08
     - _DisplaceSpeed: 8
-    - _GridIntensity: 2
+    - _GridIntensity: 1
     - _GridScale: 0.5
     - _IntersectIntensity: 2.5
     - _IntersectWidth: 0.15
@@ -44,11 +44,14 @@ Material:
     - _ScanGlowRange: 15
     - _ScanIntensity: 4
     - _ScanWidth: 1.5
+    - _XRayAlpha: 0.6
+    - _XRayIntensity: 2.5
     m_Colors:
-    - _BaseColor: {r: 0.14999998, g: 0.15999997, b: 0.21999997, a: 1}
-    - _GridColor: {r: 0, g: 0.6, b: 1, a: 1}
-    - _IntersectColor: {r: 0, g: 0.85, b: 1, a: 1}
+    - _BaseColor: {r: 0.41985583, g: 0.43006852, b: 0.4811321, a: 1}
+    - _GridColor: {r: 0, g: 0.18679243, b: 0.31132078, a: 1}
+    - _IntersectColor: {r: 0, g: 0.27295592, b: 0.3207547, a: 1}
     - _RevealColor: {r: 1, g: 0.55, b: 0, a: 1}
-    - _ScanColor: {r: 0, g: 1, b: 0.75, a: 1}
+    - _ScanColor: {r: 0, g: 0.254717, b: 0.19078803, a: 1}
+    - _XRayColor: {r: 1, g: 0.3, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
