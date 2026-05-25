@@ -12,8 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _ZWRITE_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -24,34 +23,32 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _GridTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ContourIntensity: 1.2
-    - _ContourSpacing: 1.5
-    - _ContourWidth: 0.02
-    - _DisplaceStrength: 0.08
-    - _DisplaceWidth: 2
-    - _DisplacementFreq: 25
-    - _DisplacementStrength: 0.08
-    - _GridIntensity: 1.8
-    - _GridLineWidth: 0.03
-    - _GridScale: 0.4
-    - _IsRevealable: 1
+    - _DisplaceAmount: 0.08
+    - _DisplaceSpeed: 8
+    - _GridIntensity: 2
+    - _GridScale: 0.5
+    - _IntersectIntensity: 2.5
+    - _IntersectWidth: 0.15
+    - _IsRevealable: 0
     - _RevealIntensity: 3.5
-    - _Smoothness: 0.4
-    - _WaveGlowRange: 12
-    - _WaveIntensity: 4
-    - _WaveWidth: 1.2
-    - _ZWrite: 1
+    - _ScanGlowRange: 15
+    - _ScanIntensity: 4
+    - _ScanWidth: 1.5
     m_Colors:
     - _BaseColor: {r: 0.14999998, g: 0.15999997, b: 0.21999997, a: 1}
-    - _ContourColor: {r: 0.2, g: 0.9, b: 1, a: 1}
     - _GridColor: {r: 0, g: 0.6, b: 1, a: 1}
+    - _IntersectColor: {r: 0, g: 0.85, b: 1, a: 1}
     - _RevealColor: {r: 1, g: 0.55, b: 0, a: 1}
-    - _WaveColor: {r: 0, g: 1, b: 0.75, a: 1}
+    - _ScanColor: {r: 0, g: 1, b: 0.75, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
