@@ -1,4 +1,4 @@
-Shader "TAP/TerrainScannerShader"
+Shader "TerrainScannerShader"
 {
     // Aplica este shader aos materiais dos objetos do cenário.
     // O TerrainScannerController.cs actualiza os globais em runtime.
