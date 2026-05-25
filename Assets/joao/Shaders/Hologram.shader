@@ -1,9 +1,14 @@
 Shader "Custom/SCI-FI/Hologram"
 {
     Properties
-    {        _BaseColor ("Cor Base", Color) = (0.2, 0.9, 1.0, 1.0)
+    { 
+        _BaseColor ("Cor Base", Color) = (0.2, 0.9, 1.0, 1.0)
         _EmissionColor ("Cor de Emissao", Color) = (0.4, 1.0, 1.0, 1.0)
         _Alpha ("Transparencia", Range(0.0, 1.0)) = 0.7
+        
+        [Header(Glitch Settings)]
+        _GlitchAmplitude ("Amplitude do Glitch", Range(0, 0.2)) = 0.05
+        _GlitchFrequency ("Frequencia do Glitch", Range(0, 100)) = 20
     }
 
     SubShader
@@ -53,10 +58,26 @@ Shader "Custom/SCI-FI/Hologram"
             float4 _BaseColor;
             float4 _EmissionColor;
             float _Alpha;
+            float _GlitchAmplitude;
+            float _GlitchFrequency;
 
             v2f vert(appdata v)
             {
                 v2f o;
+                
+                // --- Lógica do Glitch Sideways ---
+                // Geramos um valor aleatório baseado no tempo
+                float time = _Time.y * _GlitchFrequency;
+                float randomOffset = frac(sin(dot(float2(floor(time), 0.0), float2(12.9898, 78.233))) * 43758.5453);
+                
+                // Se o valor aleatório for muito alto, aplicamos o glitch (ocorre de forma esporádica)
+                if (randomOffset > 0.9) 
+                {
+                    // Deslocamos o X baseado na altura (v.vertex.y) para criar o efeito de "rasgão"
+                    v.vertex.x += sin(v.vertex.y * 10.0 + _Time.y * 50.0) * _GlitchAmplitude;
+                }
+                // ----------------------------------
+
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
@@ -86,6 +107,5 @@ Shader "Custom/SCI-FI/Hologram"
             ENDHLSL
         }
     }
-
     FallBack Off
 }
