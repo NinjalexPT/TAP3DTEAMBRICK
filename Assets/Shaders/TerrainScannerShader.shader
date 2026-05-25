@@ -219,7 +219,7 @@ Shader "TerrainScannerShader"
         Pass
         {
             ZTest  Greater       // rende onde o objeto está tapado
-            ZWrite Off           // não escreve no depth buffer
+            ZWrite Off         // não escreve no depth buffer
             Blend  SrcAlpha OneMinusSrcAlpha
             Cull   Back
 

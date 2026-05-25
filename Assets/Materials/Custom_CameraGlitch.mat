@@ -30,13 +30,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BlockSize: 0.086
-    - _DigitalNoise: 1
+    - _BlockSize: 0.089
+    - _DigitalNoise: 0.147
     - _GlitchEnabled: 1
-    - _GlitchIntensity: 0.5
-    - _GlitchSpeed: 5
-    - _RGBShift: 0.05
-    - _ScanlineStrength: 0.5
+    - _GlitchIntensity: 1
+    - _GlitchSpeed: 4.1
+    - _RGBShift: 0.027
+    - _ScanlineStrength: 0.549
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
