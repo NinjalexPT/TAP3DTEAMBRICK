@@ -36,21 +36,22 @@ Material:
     m_Floats:
     - _FaceMode: 1
     - _FaceSnapScale: 1
-    - _FresnelPower: 0.5
+    - _FresnelIntensity: 3
+    - _FresnelPower: 3.31
     - _HexBrightness: 2
     - _HexTiling: 0
-    - _IntersectionPow: 3.98
+    - _IntersectionPow: 0.5
     - _Opacity: 1
-    - _PulseAmplitude: 0.2
+    - _PulseAmplitude: 0
     - _PulseFrequency: 5
-    - _PulseNoiseScale: 0.1
+    - _PulseNoiseScale: 0.3
     - _PulseSpeed: 1
     - _ScanlineDensity: 15.4
-    - _ScanlineIntensity: 1
-    - _ScanlineSpeed: 2.52
-    - _ScanlineWidth: 0.5
+    - _ScanlineIntensity: 0.16
+    - _ScanlineSpeed: 5
+    - _ScanlineWidth: 0.254
     m_Colors:
-    - _CoreColor: {r: 1, g: 1, b: 1, a: 0.6}
-    - _RimColor: {r: 0.6301887, g: 0.065396875, b: 0.065396875, a: 1}
+    - _CoreColor: {r: 0, g: 0.7205, b: 1, a: 0.6}
+    - _RimColor: {r: 0.9622642, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

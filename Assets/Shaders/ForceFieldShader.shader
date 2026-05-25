@@ -5,7 +5,8 @@ Shader "Unlit/ForceFieldShader"
      // --- Cores ---
         _CoreColor ("Core Color", Color) = (0.0, 0.8, 1.0, 0.6)
         _RimColor  ("Rim / Edge Color", Color) = (0.0, 1.0, 1.0, 1.0)
-        _FresnelPower ("Fresnel Power", Range(0.5, 8.0)) = 3.0
+        _FresnelPower ("Fresnel Power", Range(0.1, 8.0)) = 3.0
+        _FresnelIntensity ("Fresnel Intensity", Range(0.5,3)) = 1.0
 
         // --- Hexagonos / Grelha ---
         _HexTex         ("Hex / Pattern Tex", 2D) = "white" {}
@@ -37,8 +38,8 @@ Shader "Unlit/ForceFieldShader"
         LOD 200
 
         Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
-        Cull Off          // ver interior da esfera também
+        ZWrite On
+        Cull Off       // ver interior da esfera também
 
         Pass
         {
@@ -53,6 +54,7 @@ Shader "Unlit/ForceFieldShader"
             fixed4  _CoreColor;
             fixed4  _RimColor;
             float   _FresnelPower;
+            float _FresnelIntensity;
 
             sampler2D _HexTex;
             float4    _HexTex_ST;
@@ -151,41 +153,42 @@ Shader "Unlit/ForceFieldShader"
                 return o;
             }
 
-            // Fragment shader 
-            fixed4 frag(v2f i) : SV_Target
-            {
-                float3 N = normalize(i.worldNrm);
-                float3 V = normalize(i.viewDir);
+                        // Fragment shader 
+// Fragment shader 
+fixed4 frag(v2f i) : SV_Target
+{
+    float3 N = normalize(i.worldNrm);
+    float3 V = normalize(i.viewDir);
 
-                // Fresnel (rim glow) 
-                float  NdotV    = saturate(dot(N, V));
-                float  fresnel  = pow(1.0 - NdotV, _FresnelPower);
+    // Fresnel (rim glow) 
+    float NdotV   = saturate(dot(N, V));
+    float fresnel = pow(1.0 - NdotV, _FresnelPower) * _FresnelIntensity;
 
-                //  Textura de padrão (hex / grelha) 
-                float2 hexUV    = i.uv * _HexTiling;
-                fixed4 hexSample= tex2D(_HexTex, TRANSFORM_TEX(hexUV, _HexTex));
-                float  hexMask  = hexSample.r * _HexBrightness;
+    // Textura de padrão (hex / grelha) 
+    float2 hexUV     = i.uv * _HexTiling;
+    fixed4 hexSample = tex2D(_HexTex, TRANSFORM_TEX(hexUV, _HexTex));
+    float  hexMask   = hexSample.r * _HexBrightness;
 
-                //  Scanlines (ondas que percorrem a esfera verticalmente)
-                // Usa a coordenada Y do mundo normalizada para as linhas
-                float scanCoord = i.worldPos.y * _ScanlineDensity
-                                  + _Time.y * _ScanlineSpeed;
-                float scan      = abs(frac(scanCoord) - 0.5);
-                float scanLine  = 1.0 - smoothstep(0.0, _ScanlineWidth, scan);
-                scanLine       *= _ScanlineIntensity;
+    // Scanlines (ondas que percorrem a esfera verticalmente)
+    float scanCoord = i.worldPos.y * _ScanlineDensity
+                      + _Time.y * _ScanlineSpeed;
+    float scan      = abs(frac(scanCoord) - 0.5);
+    float scanLine  = 1.0 - smoothstep(0.0, _ScanlineWidth, scan);
+    scanLine        *= _ScanlineIntensity;
 
-                // Cor base: mistura cor e  rim pelo fresnel 
-                fixed4 baseColor = lerp(_CoreColor, _RimColor, fresnel);
+    // 1. Cor base no centro: CoreColor + scanlines (sem Fresnel)
+    float3 coreWithScan = _CoreColor.rgb + scanLine * _RimColor.rgb * 0.3;
 
-                // Adiciona contribuições
-                baseColor.rgb += hexMask  * _RimColor.rgb * 0.4;
-                baseColor.rgb += scanLine * _RimColor.rgb;
+    // 2. Cor da borda: RimColor modulada por hex e scanlines
+    float rimGlowMask  = fresnel * (1.0 + hexMask * 0.4 + scanLine);
+    float3 rimColor    = _RimColor.rgb * rimGlowMask;
 
-                //  Alpha: fresnel + hexagonos + scanlines + opacidade global
-                float alpha = saturate(fresnel * 1.5 + hexMask * 0.4 + scanLine) * _Opacity;
+    // 3. Lerp: onde o Fresnel existe, a RimColor SUBSTITUI (não soma) a CoreColor
+    float blendFactor  = saturate(rimGlowMask);          // 0 = centro, 1 = borda
+    float3 finalColor  = lerp(coreWithScan, rimColor, blendFactor);
 
-                return fixed4(baseColor.rgb, alpha);
-            }
+    return fixed4(finalColor, _Opacity);
+}
             ENDCG
         }
     }
