@@ -1,0 +1,31 @@
+Hologram - explicacao do shader
+
+O que faz:
+- Cria um efeito de holograma com brilho nas bordas.
+- Usa a normal do objecto e a direccao da camera para calcular o efeito Fresnel.
+- Adiciona linhas horizontais animadas para simular varrimento digital.
+- Mistura uma cor base com uma cor de emissao para dar aspecto sci-fi.
+- Mantem a transparencia controlada pelo parametro Alpha.
+
+Parametros activos no material:
+- Cor Base: cor principal do holograma.
+- Cor de Emissao: cor do brilho.
+- Transparencia: controla a opacidade final.
+
+Valores fixos dentro do shader:
+- Fresnel Power = 4
+- Edge Intensity = 4
+- Scanline Density = 200
+- Scanline Speed = 16
+- Scanline Strength = 1.3
+
+O que foi removido:
+- Textura.
+- Flicker aleatorio.
+- Controlos editaveis para os valores acima.
+
+Resumo do funcionamento:
+1. O shader calcula quanto a superficie esta virada para a camera.
+2. Quanto maior o angulo, maior o brilho nas bordas.
+3. As scanlines movem-se ao longo do eixo Y do objecto.
+4. O resultado final junta a cor base, a cor de emissao e a transparencia.

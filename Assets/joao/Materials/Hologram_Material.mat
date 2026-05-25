@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Hologram_Material
+  m_Shader: {fileID: 4800000, guid: 4c6d2f9f0e1b4c5c8f19c2f61d7d9a11, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 79438e8f53501da4ba4be578272b16e5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.505
+    - _EdgeIntensity: 8
+    - _FlickerStrength: 0.548
+    - _FresnelPower: 4
+    - _ScanlineDensity: 200
+    - _ScanlineSpeed: 16
+    - _ScanlineStrength: 1.3
+    m_Colors:
+    - _BaseColor: {r: 0.0056602955, g: 1, b: 0.989816, a: 1}
+    - _EmissionColor: {r: 0.32520458, g: 0.9669453, b: 0.98490566, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
