@@ -7,13 +7,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TerrainScannerShaderMaterial
+  m_Name: ScannerScreenMat
   m_Shader: {fileID: 4800000, guid: 01e7bbc8d56c4d659a25c612a1171491, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _ZWRITE_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -33,23 +32,15 @@ Material:
     - _ContourIntensity: 1.2
     - _ContourSpacing: 1.5
     - _ContourWidth: 0.02
-    - _DisplaceStrength: 0.08
-    - _DisplaceWidth: 2
     - _GridIntensity: 1.8
     - _GridLineWidth: 0.03
     - _GridScale: 0.4
-    - _IsRevealable: 0
-    - _RevealIntensity: 3.5
-    - _Smoothness: 0.4
     - _WaveGlowRange: 12
     - _WaveIntensity: 4
     - _WaveWidth: 1.2
-    - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.14999998, g: 0.15999997, b: 0.21999997, a: 1}
     - _ContourColor: {r: 0.2, g: 0.9, b: 1, a: 1}
     - _GridColor: {r: 0, g: 0.6, b: 1, a: 1}
-    - _RevealColor: {r: 1, g: 0.55, b: 0, a: 1}
     - _WaveColor: {r: 0, g: 1, b: 0.75, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
