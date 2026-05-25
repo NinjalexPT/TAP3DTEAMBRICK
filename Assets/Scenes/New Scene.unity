@@ -338,7 +338,7 @@ GameObject:
   - component: {fileID: 762699042}
   m_Layer: 0
   m_Name: caixa
-  m_TagString: Untagged
+  m_TagString: Revelar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -560,7 +560,7 @@ MonoBehaviour:
   waveSpeed: 25
   maxRadius: 80
   fadeOutTime: 2
-  revealItems: 1
+  revealItems: 0
   debugScanOnTab: 1
 --- !u!1001 &2044080298
 PrefabInstance:

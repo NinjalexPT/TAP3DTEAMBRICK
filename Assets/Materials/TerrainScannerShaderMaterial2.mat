@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 4000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -35,17 +35,17 @@ Material:
     m_Floats:
     - _DisplaceAmount: 0.08
     - _DisplaceSpeed: 8
-    - _GridIntensity: 2
+    - _GridIntensity: 4
     - _GridScale: 0.5
     - _IntersectIntensity: 2.5
     - _IntersectWidth: 0.15
     - _IsRevealable: 1
-    - _RevealIntensity: 3.5
+    - _RevealIntensity: 8
     - _ScanGlowRange: 15
     - _ScanIntensity: 4
     - _ScanWidth: 1.5
-    - _XRayAlpha: 0.6
-    - _XRayIntensity: 2.5
+    - _XRayAlpha: 1
+    - _XRayIntensity: 6
     m_Colors:
     - _BaseColor: {r: 0.8584906, g: 0.72547674, b: 0.19032574, a: 1}
     - _GridColor: {r: 1, g: 0.54901963, b: 0, a: 1}
