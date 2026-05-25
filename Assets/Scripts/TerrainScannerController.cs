@@ -5,15 +5,14 @@ using UnityEngine;
 /// Controla a onda de scanner de terreno (estilo Death Stranding).
 ///
 /// SETUP:
-///   1. Adiciona este componente ao Player (ou origem da onda).
-///   2. Main Camera: ScannerCameraEffect + ScannerScreenMat.mat.
-///   3. Terreno/props: material TerrainScannerShader, _IsRevealable = 0.
-///   4. Itens escondidos: mesmo shader, _IsRevealable = 1, revealItems = true.
-///   5. TriggerScan(position) dispara a onda (Tab em debug, ou via script).
+///   1. Adiciona este componente a qualquer GameObject (ex: o Player).
+///   2. Os materiais do cenário devem usar o shader TAP/TerrainScannerShader.
+///   3. Chama TriggerScan(position) via script para disparar a onda.
+///      Ex: scanner.TriggerScan(grenade.transform.position);
 ///
 /// REVEAL DE ITENS:
-///   Objetos com _IsRevealable = 1 ficam invisíveis até a onda passar;
-///   glow _RevealColor durante o trail se revealItems estiver ativo.
+///   Nos objetos escondidos, no material define "_IsRevealable = 1".
+///   Quando a onda passa, ficam iluminados com _RevealColor durante o trail.
 /// </summary>
 public class TerrainScannerController : MonoBehaviour
 {

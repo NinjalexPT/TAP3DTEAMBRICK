@@ -35,10 +35,12 @@ Material:
     - _ContourWidth: 0.02
     - _DisplaceStrength: 0.08
     - _DisplaceWidth: 2
+    - _DisplacementFreq: 25
+    - _DisplacementStrength: 0.08
     - _GridIntensity: 1.8
     - _GridLineWidth: 0.03
     - _GridScale: 0.4
-    - _IsRevealable: 0
+    - _IsRevealable: 1
     - _RevealIntensity: 3.5
     - _Smoothness: 0.4
     - _WaveGlowRange: 12
