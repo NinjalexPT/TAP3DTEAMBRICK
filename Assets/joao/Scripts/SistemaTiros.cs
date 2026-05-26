@@ -14,8 +14,16 @@ public class SistemaTiros : MonoBehaviour
 
             if (Physics.Raycast(raio, out acerto))
             {
+                // 1. Verifica se acertou no Force Field (Escudo) primeiro
+                VidaEscudo escudo = acerto.collider.GetComponent<VidaEscudo>();
+                if (escudo != null)
+                {
+                    escudo.ReceberDano(danoPorTiro);
+                    return; // Interrompe o tiro aqui. A bala não passa do escudo!
+                }
+
+                // 2. Verifica se acertou na Nave (Só chega aqui se o tiro não bateu num escudo)
                 ExplosaoNave nave = acerto.collider.GetComponentInParent<ExplosaoNave>();
-                
                 if (nave != null)
                 {
                     nave.ReceberDano(danoPorTiro);
