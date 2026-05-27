@@ -2,10 +2,12 @@ Shader "Custom/SCI-FI/Hologram"
 {
     Properties
     { 
+        // Cores e transparência do holograma
         _BaseColor ("Cor Base", Color) = (0.2, 0.9, 1.0, 1.0)
         _EmissionColor ("Cor de Emissao", Color) = (0.4, 1.0, 1.0, 1.0)
         _Alpha ("Transparencia", Range(0.0, 1.0)) = 0.7
         
+        // Pequeno efeito de falha visual que aparece de vez em quando
         [Header(Glitch Settings)]
         _GlitchAmplitude ("Amplitude do Glitch", Range(0, 0.2)) = 0.05
         _GlitchFrequency ("Frequencia do Glitch", Range(0, 100)) = 20
@@ -13,6 +15,7 @@ Shader "Custom/SCI-FI/Hologram"
 
     SubShader
     {
+        // Shader de transparência com brilho, pensado para parecer um holograma
         Tags
         {
             "Queue" = "Transparent"
@@ -65,18 +68,17 @@ Shader "Custom/SCI-FI/Hologram"
             {
                 v2f o;
                 
-                // --- Lógica do Glitch Sideways ---
-                // Geramos um valor aleatório baseado no tempo
+                // O glitch faz pequenas falhas laterais, como se a imagem tremesse
+                // em alguns momentos.
                 float time = _Time.y * _GlitchFrequency;
                 float randomOffset = frac(sin(dot(float2(floor(time), 0.0), float2(12.9898, 78.233))) * 43758.5453);
                 
-                // Se o valor aleatório for muito alto, aplicamos o glitch (ocorre de forma esporádica)
+                // Quando esse valor passa do limite, aplicamos a distorção só naquele instante
                 if (randomOffset > 0.9) 
                 {
-                    // Deslocamos o X baseado na altura (v.vertex.y) para criar o efeito de "rasgão"
+                    // Move levemente a imagem para o lado, criando um efeito de "rasgo"
                     v.vertex.x += sin(v.vertex.y * 10.0 + _Time.y * 50.0) * _GlitchAmplitude;
                 }
-                // ----------------------------------
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
@@ -89,16 +91,21 @@ Shader "Custom/SCI-FI/Hologram"
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
                 float3 normalDir = normalize(i.worldNormal);
 
+                // Fresnel: o efeito fica mais forte nas bordas, conforme o objeto
+                // olha de lado para a câmera.
                 float fresnel = pow(1.0 - saturate(dot(viewDir, normalDir)), FRESNEL_POWER);
                 float edge = fresnel * EDGE_INTENSITY;
 
+                // Linhas horizontais que sobem e descem para dar sensação de projeção digital
                 float scanPhase = (i.worldPos.y * SCANLINE_DENSITY) - (_Time.y * SCANLINE_SPEED);
                 float scanline = 0.5 + 0.5 * sin(scanPhase);
                 scanline = lerp(1.0, scanline, SCANLINE_STRENGTH);
 
+                // Pequena oscilação para o holograma parecer vivo
                 float pulse = 0.65 + 0.35 * sin(_Time.y * 4.0 + i.worldPos.y * 2.0);
                 float intensity = saturate(edge + scanline * 0.35) * pulse;
 
+                // Base azulada com brilho forte nas bordas e nas linhas do efeito
                 float3 color = _BaseColor.rgb * 0.25 + _EmissionColor.rgb * intensity;
                 float alpha = saturate((_Alpha * 0.35) + fresnel * 0.65 + scanline * 0.1);
 

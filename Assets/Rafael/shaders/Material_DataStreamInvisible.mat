@@ -32,7 +32,7 @@ Material:
     - _Columns: 20
     - _GlowIntensity: 2
     - _Speed: 1
-    - _Tiling: 1
+    - _Tiling: 0.04
     m_Colors:
     - _Color: {r: 0.0747597, g: 0.754717, b: 0.07987976, a: 1}
   m_BuildTextureStacks: []

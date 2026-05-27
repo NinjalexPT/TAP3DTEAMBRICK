@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TerrainScannerShaderMaterial2
+  m_Name: TerrainScannerShaderMaterial 1
   m_Shader: {fileID: 4800000, guid: 01e7bbc8d56c4d659a25c612a1171491, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 4000
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -35,23 +35,23 @@ Material:
     m_Floats:
     - _DisplaceAmount: 0.08
     - _DisplaceSpeed: 8
-    - _GridIntensity: 4
+    - _GridIntensity: 1
     - _GridScale: 0.5
     - _IntersectIntensity: 2.5
     - _IntersectWidth: 0.15
-    - _IsRevealable: 1
-    - _RevealIntensity: 8
+    - _IsRevealable: 0
+    - _RevealIntensity: 3.5
     - _ScanGlowRange: 15
     - _ScanIntensity: 4
     - _ScanWidth: 1.5
-    - _XRayAlpha: 1
-    - _XRayIntensity: 6
+    - _XRayAlpha: 0.6
+    - _XRayIntensity: 2.5
     m_Colors:
-    - _BaseColor: {r: 0.73333335, g: 0.7372549, b: 0.7647059, a: 1}
-    - _GridColor: {r: 1, g: 0.54901963, b: 0, a: 1}
-    - _IntersectColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    - _BaseColor: {r: 0.7372549, g: 0.6156863, b: 0.56078434, a: 1}
+    - _GridColor: {r: 0, g: 0.18679243, b: 0.31132078, a: 1}
+    - _IntersectColor: {r: 0, g: 0.27295592, b: 0.3207547, a: 1}
     - _RevealColor: {r: 1, g: 0.55, b: 0, a: 1}
-    - _ScanColor: {r: 1, g: 0.54901963, b: 0, a: 1}
+    - _ScanColor: {r: 0, g: 0.254717, b: 0.19078803, a: 1}
     - _XRayColor: {r: 1, g: 0.3, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

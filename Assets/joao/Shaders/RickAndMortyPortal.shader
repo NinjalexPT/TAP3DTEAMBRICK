@@ -2,6 +2,7 @@ Shader "Custom/RickAndMortyPortal"
 {
     Properties
     {
+         // Cores principais do portal e controlo da animação
          [HDR] _MainColor ("Verde Brilhante (HDR)", Color) = (0.0, 1.0, 0.2, 1.0)
       [HDR]  _DarkColor ("Verde Escuro", Color) = (0.0, 0.1, 0.02, 1.0)
         [HDR] _CoreColor ("Centro do Portal", Color) = (0.8, 1.0, 0.7, 1.0)
@@ -10,6 +11,7 @@ Shader "Custom/RickAndMortyPortal"
     }
     SubShader
     {
+        // Shader transparente pensado para parecer um portal com brilho e movimento
         Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite Off
@@ -38,7 +40,7 @@ Shader "Custom/RickAndMortyPortal"
                 return o;
             }
 
-            // Função pseudo-ruído para gerar as bolhas orgânicas do desenho animado
+            // Função pseudo-ruído para gerar as bolhas orgânicas que quis tenar copiar o rick and morty
             float noise(float2 p) {
                 return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
             }
@@ -50,28 +52,28 @@ Shader "Custom/RickAndMortyPortal"
                 float r = length(uv);
                 float angle = atan2(uv.y, uv.x);
 
-                // Forçar o corte circular perfeito na borda do plano
+                // Mantém o formato redondo do portal, cortando as partes fora do círculo
                 float alphaEdge = smoothstep(0.5, 0.47, r);
 
-                // Efeito de Profundidade Infinito (Túnel)
-                // O inverso do raio (1/r) faz com que o centro pareça infinitamente longe
+                // Simulamos profundidade usando a distância ao centro:
+                // quanto mais perto do centro, mais o portal parece entrar para dentro
                 float depth = 1.0 / (r + 0.001);
 
-                // Criar o turbilhão espiral (Vórtice)
+                // Aqui criamos o vórtice: o ângulo + a profundidade fazem o movimento em espiral
                 float swirl = angle + depth * 0.2 - _Time.y * _Speed;
 
-                // Gerar o padrão de "bolhas" do Rick and Morty combinando ondas senoidais distorcidas
+                // As "bolhas" e ondulações nascem de ondas que se misturam e mudam com o tempo
                 float pattern = sin(swirl * 6.0) * cos(depth * 0.5 + _Time.y);
                 pattern += sin(angle * 3.0 - _Time.y * 2.0) * _WaveStrength;
                 
-                // Adicionar micro-detalhes baseados na profundidade para parecer denso
+                // Pequenos detalhes extras para o portal parecer mais vivo e cheio
                 pattern += sin(depth * 2.0 - _Time.y * _Speed) * 0.2;
 
-                // Interpolação de cores (Base do portal)
+                // Mistura entre verde escuro e verde brilhante para formar o corpo do portal
                 float colorMask = saturate(pattern * 0.5 + 0.5);
                 fixed4 col = lerp(_DarkColor, _MainColor, colorMask);
 
-                // Brilho central (Efeito de luz no fundo do túnel)
+                // O centro fica mais claro para dar a sensação de fundo luminoso
                 float coreGlowing = smoothstep(0.0, 15.0, depth);
                 col = lerp(col, _CoreColor, coreGlowing * 0.7);
 
