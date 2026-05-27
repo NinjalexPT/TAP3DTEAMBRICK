@@ -2229,6 +2229,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vida: 100
+  pulseNoiseScaleBase: 0.3
+  pulseNoiseScalePico: 14
+  duracaoEfeito: 0.5
 --- !u!135 &1344422646
 SphereCollider:
   m_ObjectHideFlags: 0

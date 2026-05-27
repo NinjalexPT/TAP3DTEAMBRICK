@@ -39,7 +39,7 @@ Shader "Unlit/ForceFieldShader"
 
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite On
-        Cull Off       // ver interior da esfera também
+        Cull Back       // ver interior da esfera também
 
         Pass
         {
@@ -154,44 +154,45 @@ Shader "Unlit/ForceFieldShader"
             }
 
                         // Fragment shader 
-// Fragment shader 
-fixed4 frag(v2f i) : SV_Target
-{
-    float3 N = normalize(i.worldNrm);
-    float3 V = normalize(i.viewDir);
+            // Fragment shader 
+            fixed4 frag(v2f i) : SV_Target
+            {
+                float3 N = normalize(i.worldNrm);
+                float3 V = normalize(i.viewDir);
 
-    // Fresnel (rim glow) 
-    float NdotV   = saturate(dot(N, V));
-    float fresnel = pow(1.0 - NdotV, _FresnelPower) * _FresnelIntensity;
+                // Fresnel (rim glow) 
+                float NdotV   = saturate(dot(N, V));
+                float fresnel = pow(1.0 - NdotV, _FresnelPower) * _FresnelIntensity;
 
-    // Textura de padrão (hex / grelha) 
-    float2 hexUV     = i.uv * _HexTiling;
-    fixed4 hexSample = tex2D(_HexTex, TRANSFORM_TEX(hexUV, _HexTex));
-    float  hexMask   = hexSample.r * _HexBrightness;
+                // Textura de padrão (hex / grelha) 
+                float2 hexUV     = i.uv * _HexTiling;
+                fixed4 hexSample = tex2D(_HexTex, TRANSFORM_TEX(hexUV, _HexTex));
+                float  hexMask   = hexSample.r * _HexBrightness;
 
-    // Scanlines (ondas que percorrem a esfera verticalmente)
-    float scanCoord = i.worldPos.y * _ScanlineDensity
-                      + _Time.y * _ScanlineSpeed;
-    float scan      = abs(frac(scanCoord) - 0.5);
-    float scanLine  = 1.0 - smoothstep(0.0, _ScanlineWidth, scan);
-    scanLine        *= _ScanlineIntensity;
+                // Scanlines (ondas que percorrem a esfera verticalmente)
+                float scanCoord = i.worldPos.y * _ScanlineDensity
+                                  + _Time.y * _ScanlineSpeed;
+                float scan      = abs(frac(scanCoord) - 0.5);
+                float scanLine  = 1.0 - smoothstep(0.0, _ScanlineWidth, scan);
+                scanLine        *= _ScanlineIntensity;
 
-    // 1. Cor base no centro: CoreColor + scanlines (sem Fresnel)
-    float3 coreWithScan = _CoreColor.rgb + scanLine * _RimColor.rgb * 0.3;
+                // 1. Cor base no centro: CoreColor + scanlines (sem Fresnel)
+                float3 coreWithScan = _CoreColor.rgb + scanLine * _RimColor.rgb * 0.3;
 
-    // 2. Cor da borda: RimColor modulada por hex e scanlines
-    float rimGlowMask  = fresnel * (1.0 + hexMask * 0.4 + scanLine);
-    float3 rimColor    = _RimColor.rgb * rimGlowMask;
+                // 2. Cor da borda: RimColor modulada por hex e scanlines
+                float rimGlowMask  = fresnel * (1.0 + hexMask * 0.4 + scanLine);
+                float3 rimColor    = _RimColor.rgb * rimGlowMask;
 
-    // 3. Lerp: onde o Fresnel existe, a RimColor SUBSTITUI (não soma) a CoreColor
-    float blendFactor  = saturate(rimGlowMask);          // 0 = centro, 1 = borda
-    float3 finalColor  = lerp(coreWithScan, rimColor, blendFactor);
+                // 3. Lerp: onde o Fresnel existe, a RimColor SUBSTITUI (não soma) a CoreColor
+                float blendFactor  = saturate(rimGlowMask);          // 0 = centro, 1 = borda
+                float3 finalColor  = lerp(coreWithScan, rimColor, blendFactor);
 
-    return fixed4(finalColor, _Opacity);
-}
-            ENDCG
-        }
-    }
+                return fixed4(finalColor, _Opacity);
+            }
+               ENDCG
+
+         }
+       }
 
     FallBack "Transparent/Diffuse"
 }
