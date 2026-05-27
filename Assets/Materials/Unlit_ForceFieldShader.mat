@@ -40,12 +40,13 @@ Material:
     - _FresnelPower: 3.31
     - _HexBrightness: 2
     - _HexTiling: 0
+    - _InnerAlpha: 1
     - _IntersectionPow: 0.5
     - _Opacity: 0.874
-    - _PulseAmplitude: 0.1
+    - _PulseAmplitude: 0.08
     - _PulseFrequency: 5
-    - _PulseNoiseScale: 0.1
-    - _PulseSpeed: 1
+    - _PulseNoiseScale: 0.3
+    - _PulseSpeed: 0.5
     - _ScanlineDensity: 15.4
     - _ScanlineIntensity: 0.16
     - _ScanlineSpeed: 5
