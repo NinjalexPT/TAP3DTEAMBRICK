@@ -39,7 +39,7 @@ Shader "Unlit/ForceFieldShader"
 
         Blend SrcAlpha OneMinusSrcAlpha
         ZWrite On
-        Cull Back       // ver interior da esfera também
+        Cull Off       // ver interior da esfera também
 
         Pass
         {
